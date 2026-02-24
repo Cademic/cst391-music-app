@@ -1,0 +1,5 @@
+{
+    "buildCommand": "cd cst391-music-app && npm install && npm run build",
+    "outputDirectory": "cst391-music-app/.next",
+    "installCommand": "cd cst391-music-app && npm install"
+  }
