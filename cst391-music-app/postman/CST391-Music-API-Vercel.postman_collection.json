@@ -1,0 +1,79 @@
+{
+  "info": {
+    "name": "CST391 Music API (Vercel)",
+    "description": "Next.js API – base URL = your deployed Vercel URL, same /api routes. Set the baseUrl variable to your app (e.g. https://cst391-music-app-psi.vercel.app).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "https://cst391-music-app-psi.vercel.app"
+    }
+  ],
+  "item": [
+    {
+      "name": "GET all albums",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/albums",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "albums"]
+        },
+        "description": "Returns all albums with their tracks."
+      }
+    },
+    {
+      "name": "GET album by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/albums?albumId=1",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "albums"],
+          "query": [
+            { "key": "albumId", "value": "1", "description": "Album ID" }
+          ]
+        },
+        "description": "Returns a single album (and its tracks) by albumId."
+      }
+    },
+    {
+      "name": "POST create album",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Test Album\",\n  \"artist\": \"Test Artist\",\n  \"year\": 2025,\n  \"description\": \"Created via Postman (Vercel)\",\n  \"tracks\": [\n    { \"number\": 1, \"title\": \"Track One\" },\n    { \"number\": 2, \"title\": \"Track Two\" }\n  ]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/albums",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "albums"]
+        },
+        "description": "Creates a new album. Required: title, artist, year. Optional: description, image, tracks (array of { number, title, lyrics?, video? })."
+      }
+    },
+    {
+      "name": "GET db-check",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/db-check",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "db-check"]
+        },
+        "description": "Health check: database connection and sample artist."
+      }
+    }
+  ]
+}
