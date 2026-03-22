@@ -1,66 +1,202 @@
 {
   "info": {
     "name": "CST391 Music API (Vercel)",
-    "description": "Next.js API – base URL = your deployed Vercel URL, same /api routes. Set the baseUrl variable to your app (e.g. https://cst391-music-app-psi.vercel.app).",
+    "description": "Next.js API – set `baseUrl` to your deployed app. Apply `playlists_schema.sql` to Vercel Postgres before playlist requests.\n\nEvidence: For each playlist/admin request, capture a screenshot labeled with the route and intended user (customer vs admin).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "baseUrl",
       "value": "https://cst391-music-app-psi.vercel.app"
-    }
+    },
+    {
+      "key": "ownerUserId",
+      "value": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+    },
+    { "key": "playlistId", "value": "" },
+    { "key": "trackId", "value": "1" }
   ],
   "item": [
     {
-      "name": "GET all albums",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/albums",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "albums"]
-        },
-        "description": "Returns all albums with their tracks."
-      }
-    },
-    {
-      "name": "GET album by ID",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "{{baseUrl}}/api/albums?albumId=1",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "albums"],
-          "query": [
-            { "key": "albumId", "value": "1", "description": "Album ID" }
-          ]
-        },
-        "description": "Returns a single album (and its tracks) by albumId."
-      }
-    },
-    {
-      "name": "POST create album",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
+      "name": "Albums",
+      "item": [
+        {
+          "name": "GET all albums",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/albums",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "albums"]
+            },
+            "description": "Returns all albums with their tracks."
           }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"title\": \"Test Album\",\n  \"artist\": \"Test Artist\",\n  \"year\": 2025,\n  \"description\": \"Created via Postman (Vercel)\",\n  \"tracks\": [\n    { \"number\": 1, \"title\": \"Track One\" },\n    { \"number\": 2, \"title\": \"Track Two\" }\n  ]\n}"
         },
-        "url": {
-          "raw": "{{baseUrl}}/api/albums",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "albums"]
+        {
+          "name": "GET album by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/albums?albumId=1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "albums"],
+              "query": [
+                { "key": "albumId", "value": "1", "description": "Album ID" }
+              ]
+            },
+            "description": "Returns a single album (and its tracks) by albumId."
+          }
         },
-        "description": "Creates a new album. Required: title, artist, year. Optional: description, image, tracks (array of { number, title, lyrics?, video? })."
-      }
+        {
+          "name": "POST create album",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Test Album\",\n  \"artist\": \"Test Artist\",\n  \"year\": 2025,\n  \"description\": \"Created via Postman (Vercel)\",\n  \"tracks\": [\n    { \"number\": 1, \"title\": \"Track One\" },\n    { \"number\": 2, \"title\": \"Track Two\" }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/albums",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "albums"]
+            },
+            "description": "Creates a new album."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Playlists (customer)",
+      "item": [
+        {
+          "name": "POST create playlist",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Chill Mix\",\n  \"ownerUserId\": \"{{ownerUserId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/playlists",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "playlists"]
+            },
+            "description": "Screenshot label: POST /api/playlists — customer. Copy `id` to `playlistId`."
+          }
+        },
+        {
+          "name": "GET playlists (mine)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/playlists?ownerUserId={{ownerUserId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "playlists"],
+              "query": [
+                {
+                  "key": "ownerUserId",
+                  "value": "{{ownerUserId}}"
+                }
+              ]
+            },
+            "description": "Screenshot label: GET /api/playlists?ownerUserId=… — customer."
+          }
+        },
+        {
+          "name": "GET playlists (all, no filter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/playlists",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "playlists"]
+            },
+            "description": "All playlists when query omitted (open access for Milestone 4 testing)."
+          }
+        },
+        {
+          "name": "POST add track to playlist",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Owner-User-Id", "value": "{{ownerUserId}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trackId\": {{trackId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/playlists/{{playlistId}}/tracks",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "playlists", "{{playlistId}}", "tracks"]
+            },
+            "description": "Screenshot label: POST /api/playlists/{id}/tracks — customer."
+          }
+        },
+        {
+          "name": "DELETE track from playlist",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "X-Owner-User-Id", "value": "{{ownerUserId}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/playlists/{{playlistId}}/tracks/{{trackId}}",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "playlists",
+                "{{playlistId}}",
+                "tracks",
+                "{{trackId}}"
+              ]
+            },
+            "description": "Screenshot label: DELETE /api/playlists/{id}/tracks/{trackId} — customer."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Playlists (admin)",
+      "item": [
+        {
+          "name": "GET admin playlists",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/playlists",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "playlists"]
+            },
+            "description": "Screenshot label: GET /api/admin/playlists — admin."
+          }
+        },
+        {
+          "name": "DELETE admin playlist",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/playlists/{{playlistId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "playlists", "{{playlistId}}"]
+            },
+            "description": "Screenshot label: DELETE /api/admin/playlists/{id} — admin."
+          }
+        }
+      ]
     },
     {
       "name": "GET db-check",
@@ -72,7 +208,7 @@
           "host": ["{{baseUrl}}"],
           "path": ["api", "db-check"]
         },
-        "description": "Health check: database connection and sample artist."
+        "description": "Health check."
       }
     }
   ]

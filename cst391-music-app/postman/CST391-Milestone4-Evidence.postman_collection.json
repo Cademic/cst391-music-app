@@ -1,0 +1,146 @@
+{
+  "info": {
+    "name": "CST391 Milestone 4 — API evidence (screenshots)",
+    "description": "Use this collection for Milestone 4 **Testing and Evidence** (Postman screenshots).\n\n**Before you start**\n1. Run `npm run dev` (local) or set `baseUrl` to your Vercel app.\n2. Apply `Docs/Milestone Guides/CST-391-Milestone4/playlists_schema.sql` to the same Postgres your app uses.\n3. Ensure `albums` / `tracks` data exists so `trackId` (e.g. `1`) is valid.\n\n**Screenshot rule (assignment)**\nFor **each** request below, capture a successful response and **label** the image (or filename) with:\n- the **HTTP method and path** (e.g. `POST /api/playlists`)\n- the **user type**: **customer** or **admin**\n\nUse the **Screenshot label** line in each request’s description as the exact text to copy.\n\n**Suggested order**\n1. Run all **Customer** requests top to bottom (copy `id` from create → `playlistId`).\n2. Run **Admin** requests (uses same `playlistId` for delete demo, or any id from GET admin).\n",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    {
+      "key": "ownerUserId",
+      "value": "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
+    },
+    { "key": "playlistId", "value": "" },
+    { "key": "trackId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Customer",
+      "item": [
+        {
+          "name": "POST /api/playlists",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Evidence Playlist\",\n  \"ownerUserId\": \"{{ownerUserId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/playlists",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "playlists"]
+            },
+            "description": "**Screenshot label:** `POST /api/playlists` — **customer**\n\n201 Created. Copy `id` from the response into collection variable `playlistId` (Postman: … menu → Edit → Variables, or set manually)."
+          }
+        },
+        {
+          "name": "GET /api/playlists (by owner)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/playlists?ownerUserId={{ownerUserId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "playlists"],
+              "query": [
+                {
+                  "key": "ownerUserId",
+                  "value": "{{ownerUserId}}"
+                }
+              ]
+            },
+            "description": "**Screenshot label:** `GET /api/playlists?ownerUserId={uuid}` — **customer**\n\n200 OK — lists playlists for that owner."
+          }
+        },
+        {
+          "name": "GET /api/playlists (no filter)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/playlists",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "playlists"]
+            },
+            "description": "**Screenshot label:** `GET /api/playlists` — **customer**\n\n200 OK — lists all playlists (open listing for testing). If your instructor only wants one GET screenshot, use either this or the `ownerUserId` variant."
+          }
+        },
+        {
+          "name": "POST /api/playlists/{id}/tracks",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "X-Owner-User-Id", "value": "{{ownerUserId}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"trackId\": {{trackId}}\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/playlists/{{playlistId}}/tracks",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "playlists", "{{playlistId}}", "tracks"]
+            },
+            "description": "**Screenshot label:** `POST /api/playlists/{id}/tracks` — **customer**\n\nRequires `playlistId` set. `trackId` must exist in table `tracks`."
+          }
+        },
+        {
+          "name": "DELETE /api/playlists/{id}/tracks/{trackId}",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "X-Owner-User-Id", "value": "{{ownerUserId}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/playlists/{{playlistId}}/tracks/{{trackId}}",
+              "host": ["{{baseUrl}}"],
+              "path": [
+                "api",
+                "playlists",
+                "{{playlistId}}",
+                "tracks",
+                "{{trackId}}"
+              ]
+            },
+            "description": "**Screenshot label:** `DELETE /api/playlists/{id}/tracks/{trackId}` — **customer**\n\n204 No Content on success. If you already deleted the track, you may get 404 — re-run POST add track first."
+          }
+        }
+      ]
+    }, 
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "GET /api/admin/playlists",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/playlists",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "playlists"]
+            },
+            "description": "**Screenshot label:** `GET /api/admin/playlists` — **admin**\n\n200 OK — all playlists."
+          }
+        },
+        {
+          "name": "DELETE /api/admin/playlists/{id}",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/playlists/{{playlistId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "playlists", "{{playlistId}}"]
+            },
+            "description": "**Screenshot label:** `DELETE /api/admin/playlists/{id}` — **admin**\n\n204 No Content. Use a `playlistId` you are done testing with (creates a new playlist with POST if needed)."
+          }
+        }
+      ]
+    }
+  ]
+}

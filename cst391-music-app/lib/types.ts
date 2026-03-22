@@ -15,3 +15,12 @@ export interface Album {
   description?: string | null;
   tracks?: Track[];
 }
+
+/** Playlist row as returned by playlist APIs (camelCase JSON). */
+export interface PlaylistSummary {
+  id: string;
+  name: string;
+  ownerUserId: string | null;
+  createdAt: string;
+  trackCount: number;
+}
