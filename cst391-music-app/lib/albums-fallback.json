@@ -1,0 +1,118 @@
+[
+  {
+    "id": 0,
+    "artistId": 0,
+    "artist": "AC/DC",
+    "title": "It's a Long Way to the Top (If You Wanna Rock 'n' Roll)",
+    "description": "It's a Long Way to the Top (If You Wanna Rock 'n' Roll) is a classic single by Australian rock band AC/DC, released in 1976.",
+    "year": 1976,
+    "image": "https://upload.wikimedia.org/wikipedia/en/8/88/It%27s_a_Long_Way_to_the_Top_%28If_You_Wanna_Rock_%27n%27_Roll%29.jpg",
+    "tracks": [
+      {
+        "id": 1,
+        "albumId": 0,
+        "number": 1,
+        "title": "It's a Long Way to the Top (If You Wanna Rock 'n' Roll)",
+        "lyrics": "Ridin' down the highway\nGoin' to a show\nStop in all the byways\nPlayin' rock 'n' roll",
+        "video": "https://www.youtube.com/watch?v=-sUXMzkh-jI"
+      }
+    ]
+  },
+  {
+    "id": 1,
+    "artistId": 1,
+    "artist": "AC/DC",
+    "title": "Back in Black",
+    "description": "Back in Black is the seventh studio album by Australian rock band AC/DC, released in 1980. It is one of the best-selling albums of all time.",
+    "year": 1980,
+    "image": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/ACDC_Back_in_Black.png/960px-ACDC_Back_in_Black.png",
+    "tracks": [
+      {
+        "id": 101,
+        "albumId": 1,
+        "number": 1,
+        "title": "Hells Bells",
+        "lyrics": "I'm a rollin' thunder, pourin' rain\nI'm comin' on like a hurricane",
+        "video": "https://www.youtube.com/watch?v=etAIpkdhU9Q"
+      },
+      {
+        "id": 102,
+        "albumId": 1,
+        "number": 2,
+        "title": "Shoot to Thrill",
+        "lyrics": "All you women who want a man of the street\nBut you don't know which way you want to turn",
+        "video": "https://www.youtube.com/watch?v=Lo2qQmj0_h4"
+      },
+      {
+        "id": 103,
+        "albumId": 1,
+        "number": 3,
+        "title": "Back in Black",
+        "lyrics": "Back in black, I hit the sack\nI've been too long, I'm glad to be back",
+        "video": "https://www.youtube.com/watch?v=pAgnJDJN4VA"
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "artistId": 2,
+    "artist": "AC/DC",
+    "title": "Highway to Hell",
+    "description": "Highway to Hell is the sixth studio album by Australian rock band AC/DC, released in 1979. It was the last album to feature lead singer Bon Scott.",
+    "year": 1979,
+    "image": "https://upload.wikimedia.org/wikipedia/en/a/ac/Acdc_Highway_to_Hell.JPG",
+    "tracks": [
+      {
+        "id": 201,
+        "albumId": 2,
+        "number": 1,
+        "title": "Highway to Hell",
+        "lyrics": "Livin' easy, livin' free\nSeason ticket on a one-way ride",
+        "video": "https://www.youtube.com/watch?v=l482T0yNkeo"
+      },
+      {
+        "id": 202,
+        "albumId": 2,
+        "number": 2,
+        "title": "Girls Got Rhythm",
+        "lyrics": "I've been around the world\nI've seen a million girls",
+        "video": "https://www.youtube.com/watch?v=F7qZrJgZJwk"
+      },
+      {
+        "id": 203,
+        "albumId": 2,
+        "number": 3,
+        "title": "Walk All Over You",
+        "lyrics": "Outta my way, I'm runnin' high\nTake your chance with me and I'll give it a try",
+        "video": "https://www.youtube.com/watch?v=H4xw1J5XH9s"
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "artistId": 3,
+    "artist": "AC/DC",
+    "title": "For Those About to Rock We Salute You",
+    "description": "For Those About to Rock We Salute You is the eighth studio album by Australian rock band AC/DC, released in 1980.",
+    "year": 1980,
+    "image": "https://upload.wikimedia.org/wikipedia/en/5/5c/ForThoseAboutToRock_ACDCalbum.jpg",
+    "tracks": [
+      {
+        "id": 301,
+        "albumId": 3,
+        "number": 1,
+        "title": "For Those About to Rock (We Salute You)",
+        "lyrics": "We roll tonight to the guitar bite\nStand up and be counted",
+        "video": "https://www.youtube.com/watch?v=KXbqz5d3x9k"
+      },
+      {
+        "id": 302,
+        "albumId": 3,
+        "number": 2,
+        "title": "Put the Finger on You",
+        "lyrics": "I got my finger on you\nI got my eye on you",
+        "video": "https://www.youtube.com/watch?v=7D4uKjW1f0Q"
+      }
+    ]
+  }
+]

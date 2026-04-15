@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { pool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import type { PlaylistSummary } from "@/lib/types";
 import { isValidUuid } from "@/lib/uuid";
 
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     }
     sql += ` GROUP BY p.id ORDER BY p.created_at DESC`;
 
-    const result = await pool.query<PlaylistListRow>(sql, params);
+    const result = await getPool().query<PlaylistListRow>(sql, params);
     const body: PlaylistSummary[] = result.rows.map(toSummary);
     return NextResponse.json(body);
   } catch (error) {
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       ownerUuid = ownerUserId;
     }
 
-    const result = await pool.query<PlaylistInsertRow>(
+    const result = await getPool().query<PlaylistInsertRow>(
       `INSERT INTO playlists (name, owner_user_id)
        VALUES ($1, $2::uuid)
        RETURNING id, name, owner_user_id, created_at`,

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { pool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import type { PlaylistSummary } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -14,7 +14,7 @@ interface PlaylistListRow {
 
 export async function GET() {
   try {
-    const result = await pool.query<PlaylistListRow>(
+    const result = await getPool().query<PlaylistListRow>(
       `SELECT p.id, p.name, p.owner_user_id, p.created_at,
         COUNT(pt.track_id)::int AS track_count
        FROM playlists p

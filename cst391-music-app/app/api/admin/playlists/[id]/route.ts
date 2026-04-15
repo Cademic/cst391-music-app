@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { pool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { isValidUuid } from "@/lib/uuid";
 
 export const runtime = "nodejs";
@@ -15,7 +15,7 @@ export async function DELETE(
   }
 
   try {
-    const result = await pool.query(
+    const result = await getPool().query(
       "DELETE FROM playlists WHERE id = $1::uuid RETURNING id",
       [playlistId]
     );

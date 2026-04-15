@@ -9,7 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@popperjs/core": "^2.11.8",
     "@types/pg": "^8.16.0",
+    "bootstrap": "^5.3.8",
     "next": "16.1.6",
     "pg": "^8.18.0",
     "react": "19.2.3",
@@ -17,6 +19,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/bootstrap": "^5.2.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

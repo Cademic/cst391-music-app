@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { pool } from "@/lib/db";
+import { getPool } from "@/lib/db";
 import { requirePlaylistOwnerIfSet } from "@/lib/playlist-access";
 import { isValidUuid } from "@/lib/uuid";
 
@@ -22,7 +22,7 @@ export async function DELETE(
 
   const headerOwner = request.headers.get("X-Owner-User-Id");
 
-  const client = await pool.connect();
+  const client = await getPool().connect();
   try {
     await client.query("BEGIN");
 
