@@ -43,8 +43,8 @@ export default function NavBar() {
           </span>
           {isAdmin ? (
             <span className="nav-item nav-link">
-              <Link href="/admin/playlists" className="wf-nav-link">
-                Admin playlists
+              <Link href="/admin" className="wf-nav-link">
+                Admin
               </Link>
             </span>
           ) : null}

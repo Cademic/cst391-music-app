@@ -32,6 +32,14 @@ export async function GET(request: NextRequest) {
       url.searchParams.get("id") ?? url.searchParams.get("albumId");
     const releaseMbidParam = url.searchParams.get("releaseMbid")?.trim();
     const audioDbAlbumIdParam = url.searchParams.get("audioDbAlbumId")?.trim();
+    const adminOnlyParam = url.searchParams.get("adminOnly")?.trim() === "1";
+
+    if (adminOnlyParam && (releaseMbidParam || audioDbAlbumIdParam)) {
+      return NextResponse.json(
+        { error: "Admin album reads support DB id only" },
+        { status: 400 }
+      );
+    }
 
     if (releaseMbidParam || audioDbAlbumIdParam) {
       const extId = (audioDbAlbumIdParam ?? releaseMbidParam) as string;
