@@ -8,7 +8,7 @@ The app combines a local PostgreSQL-backed library with external music metadata 
 - music discovery and featured song browsing
 - album and artist exploration
 - authenticated user playlists
-- role-based admin playlist management
+- role-based admin dashboard for users, playlists, albums, and tracks
 - user account registration and sign-in
 - recent-search persistence for signed-in users
 
@@ -59,8 +59,13 @@ When running commands like install, lint, build, and dev server, execute them in
 
 ### 5. Admin Capabilities
 
-- Admin playlist routes and API handlers.
-- Management views for playlists beyond normal user scope.
+- Admin dashboard at `/admin` with tabbed management views.
+- View and search all users, playlists, and albums from one place.
+- Expand albums/playlists inline to view associated tracks.
+- Admin track actions: create, edit, and delete tracks.
+- Admin album actions: create, edit, and delete albums.
+- Admin user actions: view and delete users (self-delete blocked).
+- In-app modal confirmations for destructive actions (no browser popups).
 - Backend route protections integrated with session/role context.
 
 ### 6. Search and Recent Searches
@@ -102,6 +107,7 @@ Main user-facing routes include:
 - `/albums/[id]` - album detail
 - `/artists/[name]` - artist-centric view
 - `/auth/signin` and `/auth/register` - authentication pages
+- `/admin` - admin dashboard (users/playlists/albums/tracks)
 - `/admin/playlists` - admin management area
 
 Representative API routes include:
@@ -113,6 +119,9 @@ Representative API routes include:
 - `/api/music/recent-searches` - recent query persistence
 - `/api/playlists/*` - playlist CRUD and track operations
 - `/api/admin/playlists/*` - admin playlist operations
+- `/api/admin/users` and `/api/admin/users/[id]` - admin user list/delete
+- `/api/admin/albums` and `/api/admin/albums/[id]` - admin album list/create/read/update/delete
+- `/api/admin/tracks` and `/api/admin/tracks/[id]` - admin track create/update/delete
 - `/api/albums` - album data operations
 
 ## Data and Environment Configuration

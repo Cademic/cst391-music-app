@@ -5,19 +5,39 @@ import { usePathname, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { useMemo } from "react";
 
+function isLinkActive(pathname: string, href: string, label: string): boolean {
+  if (label === "Home") {
+    return pathname === "/";
+  }
+  if (label === "Library") {
+    return pathname.startsWith("/library");
+  }
+  if (label === "Discover") {
+    return pathname.startsWith("/discover");
+  }
+  if (label === "Admin") {
+    return pathname.startsWith("/admin");
+  }
+  return pathname === href;
+}
+
 export default function LeftSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = useSession();
 
   const isAdmin = session?.user?.role === "admin";
-  const navItems = useMemo(
-    () => [
-      { href: "/", label: "Home" },
-      { href: "/discover", label: "Discover" },
-      { href: "/library", label: "Library" },
-    ],
-    []
+
+  const entries = useMemo(
+    () =>
+      [
+        { kind: "link" as const, href: "/", label: "Home" },
+        { kind: "search" as const },
+        { kind: "link" as const, href: "/discover", label: "Discover" },
+        { kind: "link" as const, href: "/library", label: "Library" },
+        ...(isAdmin ? [{ kind: "link" as const, href: "/admin", label: "Admin" }] : []),
+      ] as const,
+    [isAdmin]
   );
 
   function handleSearchClick() {
@@ -33,60 +53,47 @@ export default function LeftSidebar() {
   }
 
   return (
-    <aside className="wf-left-rail" aria-label="Sidebar navigation">
-      <div className="wf-brand">
+    <aside className="wf-left-rail d-flex flex-column" aria-label="Sidebar navigation">
+      <div className="mb-3">
         {/* eslint-disable-next-line @next/next/no-img-element -- static logo in public */}
-        <img src="/pulse-player-logo.png" alt="PulsePlayer" className="wf-brand-logo" />
+        <img
+          src="/pulse-player-logo.png"
+          alt="PulsePlayer"
+          className="img-fluid rounded-2 d-block"
+          style={{ maxWidth: 160 }}
+        />
       </div>
 
-      <nav className="wf-left-nav">
-        {navItems.slice(0, 1).map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`wf-left-item text-decoration-none ${
-              item.label === "Home" && pathname === "/"
-                ? "wf-left-item--active"
-                : item.label === "Library" && pathname.startsWith("/library")
-                  ? "wf-left-item--active"
-                : item.label === "Discover" && pathname.startsWith("/discover")
-                  ? "wf-left-item--active"
-                  : ""
-            }`}
-          >
-            {item.label}
-          </Link>
-        ))}
-        <button type="button" className="wf-left-item" onClick={handleSearchClick}>
-          Search
-        </button>
-        {navItems.slice(1).map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`wf-left-item text-decoration-none ${
-              item.label === "Home" && pathname === "/"
-                ? "wf-left-item--active"
-                : item.label === "Library" && pathname.startsWith("/library")
-                  ? "wf-left-item--active"
-                  : item.label === "Discover" && pathname.startsWith("/discover")
-                    ? "wf-left-item--active"
-                    : ""
-            }`}
-          >
-            {item.label}
-          </Link>
-        ))}
-        {isAdmin ? (
-          <Link
-            href="/admin"
-            className={`wf-left-item text-decoration-none ${
-              pathname.startsWith("/admin") ? "wf-left-item--active" : ""
-            }`}
-          >
-            Admin
-          </Link>
-        ) : null}
+      <nav aria-label="Main">
+        <ul className="wf-sidebar-nav list-unstyled mb-0">
+          {entries.map((entry) => {
+            if (entry.kind === "search") {
+              return (
+                <li key="search">
+                  <button
+                    type="button"
+                    className="wf-sidebar-link"
+                    onClick={handleSearchClick}
+                  >
+                    Search
+                  </button>
+                </li>
+              );
+            }
+            const active = isLinkActive(pathname, entry.href, entry.label);
+            return (
+              <li key={entry.href}>
+                <Link
+                  href={entry.href}
+                  className={`wf-sidebar-link ${active ? "wf-sidebar-link--active" : ""}`}
+                  aria-current={active ? "page" : undefined}
+                >
+                  {entry.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </nav>
     </aside>
   );

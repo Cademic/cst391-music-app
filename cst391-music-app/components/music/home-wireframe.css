@@ -109,9 +109,9 @@
   z-index: 1;
 }
 
+/* Sidebar surface + rail shadow (nav links use .wf-sidebar-link). */
 .wf-left-rail {
   background: var(--wf-surface);
-  border-right: none;
   padding: 1rem 1rem 1.2rem;
   min-height: 100%;
   position: sticky;
@@ -130,47 +130,51 @@
   pointer-events: none;
 }
 
-.wf-brand {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  margin-bottom: 1.3rem;
-}
-
-.wf-brand-logo {
-  width: 100%;
-  max-width: 160px;
-  height: auto;
-  border-radius: 8px;
-  display: block;
-}
-
-.wf-left-nav {
+.wf-sidebar-nav {
   display: grid;
   gap: 0.45rem;
-  margin-bottom: 1.4rem;
 }
 
-.wf-left-item {
+.wf-sidebar-link {
+  display: block;
+  width: 100%;
   border: none;
   text-align: left;
   border-radius: 10px;
   padding: 0.65rem 0.85rem;
   background: transparent;
   font-weight: 600;
+  font-size: 0.95rem;
   color: #1f2937;
-  transition: background-color 180ms ease, color 180ms ease, transform 180ms ease;
+  text-decoration: none;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+  cursor: pointer;
+  box-shadow: none;
 }
 
-.wf-left-item:hover {
+.wf-sidebar-link:hover {
+  color: #111827;
   transform: translateX(2px);
-  box-shadow: none;
   background: rgba(15, 23, 42, 0.05);
 }
 
-.wf-left-item--active {
+.wf-sidebar-link:focus-visible {
+  outline: 2px solid rgba(232, 93, 154, 0.45);
+  outline-offset: 2px;
+}
+
+.wf-sidebar-link--active {
   background: rgba(232, 93, 154, 0.14);
   color: #9d174d;
+}
+
+.wf-sidebar-link--active:hover {
+  background: rgba(232, 93, 154, 0.2);
+  color: #831843;
 }
 
 .wf-left-title {
@@ -1652,8 +1656,8 @@ button.wf-pill--auth {
     animation: none !important;
   }
 
-  .wf-left-item,
   .wf-left-playlist-link,
+  .wf-sidebar-link,
   .wf-search-dropdown-item,
   .wf-search-dropdown-main,
   .wf-search-add-trigger,

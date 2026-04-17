@@ -43,17 +43,10 @@ export default function Card({
         <p className="card-text">{albumDescription}</p>
         <button
           type="button"
-          className="btn btn-primary me-2"
-          onClick={() => handleButtonClick("/show/")}
+          className="btn btn-primary"
+          onClick={() => handleButtonClick("/albums/")}
         >
           {buttonText ?? "View"}
-        </button>
-        <button
-          type="button"
-          className="btn btn-secondary"
-          onClick={() => handleButtonClick("/edit/")}
-        >
-          Edit
         </button>
       </div>
     </div>

@@ -35,7 +35,7 @@ export default function WireframeHomeHeader() {
           </Link>
           <Link
             className="wf-pill wf-pill--profile"
-            href={status === "authenticated" ? "/profile" : "/auth/signin"}
+            href={status === "authenticated" ? "/library" : "/auth/signin"}
           >
             PROFILE
           </Link>

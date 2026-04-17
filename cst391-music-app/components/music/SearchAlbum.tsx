@@ -7,7 +7,7 @@ import SearchForm from "./SearchForm";
 export interface SearchAlbumProps {
   updateSearchResults: (phrase: string) => void | Promise<void>;
   albumList: Album[];
-  /** Replaces React Router navigate: parent uses useRouter().push (e.g. /show/…, /edit/…). */
+  /** Parent uses useRouter().push — paths are typically `/albums/` + id. */
   updateSingleAlbum: (albumId: number, uri: string) => void;
 }
 

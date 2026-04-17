@@ -5,15 +5,19 @@
 | | |
 |--|--|
 | **Document owner** | Carter Wright |
-| **Version** | 1.0 |
-| **Last updated** | March 21, 2026 |
+| **Version** | 2.0 (Milestone 5) |
+| **Last updated** | April 17, 2026 |
 | **Context** | CST-391 Web Application Development · Instructor: James Sparks |
 
 ---
 
 ## Abstract
 
-This specification describes the backend extension that adds **playlist management** to the existing music catalog: new PostgreSQL tables, referential relationships to catalog **tracks**, and REST endpoints exposed by the Next.js application on Vercel. It defines the data model, entity relationships, API contract, deployment expectations, and a path toward authenticated users and role-based access. The design keeps catalog data normalized, avoids duplicate track metadata in playlists, and uses a junction table for many-to-many membership.
+This specification describes the **playlist management** feature for the music catalog: PostgreSQL tables, relationships to catalog **tracks**, REST endpoints on the Next.js (Vercel) app, and—for **Milestone 5**—the **full UI**, **Auth.js (NextAuth) sessions with roles**, **RBAC on API routes**, and a **Clean Architecture** split (route handlers → services → repositories).
+
+**How to read this document:** Sections **1–10** preserve the Milestone 4 database/API planning narrative. **Section 11** is the **authoritative Milestone 5** description (final implementation, user stories, API rules, UI flow, security, architecture, and reflection). **Section 12** maps the generic LMS Milestone 5 wording (React + Express + “product”) to this repository (Next.js + playlists). Where older sections mention “interim” headers or future auth, **Section 11** reflects what is actually shipped.
+
+The design keeps catalog data normalized, avoids duplicate track metadata in playlists, and uses a junction table for many-to-many membership.
 
 ---
 
@@ -29,6 +33,8 @@ This specification describes the backend extension that adds **playlist manageme
 8. [Implementation and operations](#8-implementation-and-operations)
 9. [Verification](#9-verification)
 10. [References](#10-references)
+11. [Milestone 5 — Final implementation](#11-milestone-5--final-implementation-ui-rbac-clean-architecture)
+12. [LMS Milestone 5 — Design alignment](#12-lms-milestone-5--design-alignment-course-instructions)
 
 ---
 
@@ -308,60 +314,99 @@ Recommended validation before release:
 
 ### 11.1 Feature summary
 
-Playlist management is fully implemented in the Next.js UI with **GitHub OAuth** (Auth.js / NextAuth), **role-based access** for guests, signed-in users, and administrators, and a **Clean Architecture** split: API route handlers delegate to **services** (`lib/services`) and **repositories** (`lib/repositories`) that own SQL. Users create playlists, add/remove catalog tracks, and list their playlists; admins list all playlists and may delete any playlist for moderation.
+Playlist management is fully implemented in the Next.js UI with **GitHub OAuth** and **credentials (email/password)** via Auth.js / NextAuth, **role-based access** for guests, signed-in users, and administrators, and a **Clean Architecture** split: playlist API route handlers delegate to **services** under `cst391-music-app/lib/services/` and **repositories** under `cst391-music-app/lib/repositories/` (the course handout refers to `src/lib/...`; this app uses the common Next.js layout **`lib/` at the project root** without a `src/` folder—same layering). Users create playlists, add/remove catalog tracks (by local `trackId` or by importing from TheAudioDB via `audioDbTrackId` / `recordingMbid`), and list their playlists; admins list all playlists and may delete any playlist for moderation.
 
 ### 11.2 Revised user stories
 
 | Actor | Story |
 |--------|--------|
-| **Guest** | As a guest, I can browse albums and see that playlists exist so I know what signing in unlocks; I am prompted to sign in before creating or editing playlists. |
-| **User** | As a signed-in user, I can create playlists, see only my playlists, open a playlist to view tracks with album/artist context, add tracks from album pages, and remove tracks from my playlists. |
-| **Admin** | As an admin, I can open an admin playlists view, see all playlists with owner ids and track counts, open any playlist for inspection, and delete any playlist. |
+| **Guest** | As a guest, I can use **Home** and **Discover**, open **Library** in the sidebar, and see a **sign-in prompt** instead of my playlists; the home hero also invites me to sign in to unlock playlists. I cannot create or edit playlists until I authenticate. |
+| **User** | As a signed-in user, I can create playlists, see **only my** playlists on **Library** (`/library`, alias `/playlists`), open a playlist detail page to view tracks with album/artist context, add tracks from album flows, and rename or delete playlists I own. |
+| **User (edge)** | As a signed-in user, if I try to open another user’s playlist URL, the API returns **403** and the UI shows an error (I cannot view or mutate it). |
+| **Admin** | As an admin, I see **Admin** in the sidebar, open **`/admin`**, use the **Playlists** tab to load **all** playlists (with owner ids and track counts), and delete any playlist via the admin API; middleware blocks non-admins from `/admin/**`. |
 
 ### 11.3 Data model updates
 
-- **`users`** — `id` (UUID), `email` (unique), `name`, `image`, `role` (`user` \| `admin`), `created_at`. DDL: [`users_schema.sql`](../Milestone%20Guides/CST-391-Milestone5/users_schema.sql).
-- **`playlists.owner_user_id`** — Set from the authenticated user on create; optional FK to `users.id` when the migration is applied.
-- Existing **`playlists`**, **`playlist_tracks`**, **`albums`**, **`tracks`** relationships are unchanged; ER diagram: [`updated-er-diagram.png`](../Images/Diagrams/updated-er-diagram.png).
+- **`users`** — `id` (UUID), `email` (unique), `name`, `image`, `role` (`user` \| `admin`), `password_hash` (credentials users), `created_at`. DDL: [`users_schema.sql`](../Milestone%20Guides/CST-391-Milestone5/users_schema.sql) (verify against repo).
+- **`playlists.owner_user_id`** — Set from the authenticated user on create; FK to `users.id` when migrations are applied.
+- Existing **`playlists`**, **`playlist_tracks`**, **`albums`**, **`tracks`** relationships are unchanged; static ER asset: [`updated-er-diagram.png`](../Images/Diagrams/updated-er-diagram.png).
+
+#### 11.3.1 Final ER (Milestone 5, text)
+
+```mermaid
+erDiagram
+  users ||--o{ playlists : owns
+  albums ||--o{ tracks : contains
+  playlists ||--o{ playlist_tracks : has
+  tracks ||--o{ playlist_tracks : in_playlist
+
+  users {
+    uuid id PK
+    varchar email UK
+    varchar role
+  }
+  playlists {
+    uuid id PK
+    uuid owner_user_id FK
+    varchar name
+    timestamptz created_at
+  }
+  playlist_tracks {
+    uuid playlist_id PK_FK
+    int track_id PK_FK
+    timestamptz added_at
+  }
+  tracks {
+    int id PK
+    int album_id FK
+    varchar title
+  }
+  albums {
+    int id PK
+    varchar title
+    varchar artist
+  }
+```
 
 ### 11.4 REST API (final) and role rules
 
 | Method | Path | Rule |
 |--------|------|------|
-| `GET` | `/api/playlists` | **User** — 401 if unauthenticated; returns only the caller’s playlists. |
-| `POST` | `/api/playlists` | **User** — 401 if unauthenticated; body `{ "name" }`; `owner_user_id` is taken from session only. |
-| `GET` | `/api/playlists/[id]` | **User** — 401 if unauthenticated; **403** if not owner and not admin; **404** if missing. Returns playlist + tracks (with album title and artist). |
-| `POST` | `/api/playlists/[id]/tracks` | **User** — body `{ "trackId" }`; owner or **admin** may mutate; **404** / **409** as applicable. |
+| `GET` | `/api/playlists` | **Authenticated** — **401** if no session; returns **only** the caller’s playlists. |
+| `POST` | `/api/playlists` | **Authenticated** — body `{ "name" }`; `owner_user_id` comes **only** from the session. |
+| `GET` | `/api/playlists/[id]` | **Authenticated** — **403** if not owner and not admin; **404** if missing. Returns playlist + tracks. |
+| `PATCH` | `/api/playlists/[id]` | **Authenticated** — body `{ "name" }`; owner or **admin** may rename; **403** / **404** as applicable. |
+| `DELETE` | `/api/playlists/[id]` | **Authenticated** — owner or **admin** may delete; **403** / **404** as applicable. |
+| `POST` | `/api/playlists/[id]/tracks` | **Authenticated** — body one of: `{ "trackId": number }`, `{ "audioDbTrackId": string }`, or `{ "recordingMbid": string }` (last two import/upsert via TheAudioDB then add); owner or **admin**; **404** / **409** (duplicate) / **502** (import failure) as applicable. |
 | `DELETE` | `/api/playlists/[id]/tracks/[trackId]` | Same ownership rules as add. |
-| `GET` | `/api/admin/playlists` | **Admin** only — **403** for non-admin. |
-| `DELETE` | `/api/admin/playlists/[id]` | **Admin** only. |
+| `GET` | `/api/admin/playlists` | **Admin** only — **401** if unauthenticated; **403** if not admin. |
+| `DELETE` | `/api/admin/playlists/[id]` | **Admin** only — **204** on success. |
 
 Unauthenticated requests to protected routes return **401**; forbidden role or ownership returns **403**; missing resources return **404**.
 
 ### 11.5 UI / UX flow
 
-- **Navigation** — Main, New, Playlists; **Admin playlists** (admins only); **Sign in** / **Sign out**.
-- **`/playlists`** — Guests see a short explanation and sign-in; users see their playlists with track counts and links.
-- **`/playlists/create`** — Authenticated only (middleware); create then redirect to detail.
-- **`/playlists/[id]`** — Track table with remove; links to browse albums and return to list.
-- **`/admin/playlists`** — Admin-only table with delete; middleware and API both enforce admin.
-- **Album / track pages** — Signed-in users get playlist picker + **Add** next to each track.
+- **Navigation (left rail)** — **Home**, **Search** (opens universal search or home search), **Discover**, **Library** (`/library`); **Admin** → **`/admin`** **only when** `session.user.role === "admin"`; hero **SIGN IN** / **REGISTER** / **LOG OUT** on Home.
+- **`/library`** (same UI as **`/playlists`**) — Guests: copy + **Sign in** button (`callbackUrl=/library`). Users: grid of owned playlists, create, rename (edit route), delete; cards link to **`/library/[id]`** (detail).
+- **`/library/create`** and **`/playlists/create`** — Middleware requires sign-in; create flow then continues in-app.
+- **`/library/[id]`** / **`/playlists/[id]`** — Middleware requires sign-in; track list, remove track, add from catalog flows; **403** surfaced as error state where applicable.
+- **`/admin`** — Unified admin dashboard (users, playlists, albums, tracks); playlist moderation uses the **Playlists** tab and the same admin playlist APIs; non-admins are redirected by middleware.
 
 ### 11.6 Security and RBAC
 
-- **Middleware** — Protects `/playlists/create`, `/playlists/[id]`, and `/admin/**` (admin routes require `admin` role).
-- **UI** — Hides admin nav for non-admins; API remains authoritative for all checks.
-- **Session** — JWT session carries `user.id` (UUID) and `user.role`; playlist ownership checks use `users.id` = `playlists.owner_user_id`.
-- **Admin promotion** — `ADMIN_EMAILS` environment variable (comma-separated) promotes matching accounts to `admin` on sign-in.
+- **Middleware** — Requires authentication for **`/library/**`** (except `/library` list), **`/playlists/**`** (except `/playlists` list), and **`/admin/**`**; **admin** role required for `/admin/**`. Guests may hit **`/`**, **`/discover`**, **`/library`** (list), **`/playlists`** (list), and auth pages.
+- **UI** — Admin link is **hidden** unless `role === "admin"`; hidden UI is **not** a security boundary—APIs still return **401/403**.
+- **Session** — JWT carries `user.id` and `user.role`; ownership uses `users.id` = `playlists.owner_user_id`.
+- **Admin promotion** — `ADMIN_EMAILS` (comma-separated) promotes matching GitHub emails to `admin` on sign-in (see auth wiring in codebase).
 
 ### 11.7 Architecture (UI → API → services → repositories)
 
 ```mermaid
 flowchart LR
-  UI[Next.js pages and components]
+  UI[Next.js pages and client components]
   API[Route handlers app/api]
-  SVC[lib/services]
-  REP[lib/repositories]
+  SVC[cst391-music-app/lib/services]
+  REP[cst391-music-app/lib/repositories]
   DB[(PostgreSQL)]
   UI --> API
   API --> SVC
@@ -369,15 +414,40 @@ flowchart LR
   REP --> DB
 ```
 
+**Playlist feature:** `playlist-service.ts` orchestrates rules; `playlist-repository.ts` owns SQL for `playlists` / `playlist_tracks`. **Other domains** (e.g. some music search/album routes) may still use `getPool()` in route handlers; the Milestone 5 playlist vertical is fully layered as required.
+
 ### 11.8 Clean Architecture reflection
 
-Route files were reduced to **HTTP adapters**: parse input, call `playlist-service` with the Auth.js session, map `ServiceResult` to status codes. **Repositories** concentrate SQL for playlists and `playlist_tracks` (list, insert, joins, deletes). **Services** enforce authorization (owner vs admin), validation, and orchestration (transactions for add-track). This keeps business rules testable and prevents duplicated authorization logic between UI and API.
+Route files act as **HTTP adapters**: validate shape (e.g. UUID), parse JSON, call `playlist-service` with the Auth.js session, map `ServiceResult` to status codes. **Repositories** concentrate SQL for playlists and `playlist_tracks` (list, insert, joins, deletes). **Services** enforce authorization (owner vs admin), validation, and orchestration (e.g. transaction boundary when adding a track). That keeps rules **testable** and avoids trusting the browser for permissions—the UI hides controls, but the API **always** decides.
 
 ### 11.9 Assumptions, constraints, and AI usage
 
 - **Assumptions** — GitHub OAuth credentials and `AUTH_SECRET` are configured in each environment; `users` table migration has been applied where playlist ownership is enforced.
 - **Constraints** — Playlist sharing and public playlist URLs are out of scope.
 - **AI usage** — Cursor / GPT-assisted implementation and refactoring for Milestone 5 (auth wiring, repository/service extraction, UI pages, and this documentation update).
+
+---
+
+## 12. LMS Milestone 5 — Design alignment (course instructions)
+
+The official Milestone 5 brief describes a **React** client integrated with **Express** APIs and a generic **“product”** resource. This project’s **delivered software** uses **Next.js (React) App Router** with **Next.js route handlers** instead of a separate Express server, and the CRUD resource is the **playlist** (plus **playlist track membership**), not a separate `products` table. Aside from that stack mapping, the implementation satisfies the same intent: **list, create, read, update, and delete** the resource from the UI with navigation.
+
+### 12.1 Design vs. delivery (summary table)
+
+| Topic | Design / instruction | Delivered software | Notes |
+|--------|----------------------|--------------------|--------|
+| **Client** | React SPA | **Next.js** (React 19) with server and client components | Framework per course project evolution. |
+| **API host** | Express / Node | **Next.js `app/api/*` route handlers** | REST JSON APIs; no separate Express process. |
+| **“Product” CRUD** | Product entity | **Playlist** CRUD (`/api/playlists`, `/api/playlists/[id]`) | Rename = **update**; tracks managed via nested routes. |
+| **Navigation** | App navigation + **Bootstrap NavBar** | **Left rail** (`LeftSidebar`) with Bootstrap **`list-unstyled`** + custom **`wf-sidebar-link`** styles; **no top `NavBar`** in the current shell | *Gap for LMS screencast:* assignment explicitly asks for a **Bootstrap NavBar**—restore a thin top `navbar` (see `bootstrap-client.tsx`) or confirm with the instructor. |
+| **REST documentation** | Postman (or similar) | **Section 11.4** + existing Postman collections if present in repo; otherwise export a collection from Postman pointing at the same paths | Attach exported JSON or published Postman documentation to the submission. |
+| **Screencast / PowerPoint** | Required | *Student deliverables* | Record UI navigation, CRUD, and slide deck per LMS (challenges, open issues, lessons learned). |
+
+### 12.2 Known issues / intentional differences
+
+- **Bootstrap NavBar (LMS)** — The generic Milestone 5 handout expects a visible **Bootstrap NavBar**. This build uses **sidebar navigation** only; for full alignment with that rubric item, add a **top** `navbar navbar-expand-lg` (can coexist with the sidebar).
+- **Non-playlist APIs** — Some catalog endpoints (`/api/music/*`, `/api/albums`, etc.) are not fully refactored into repository/service layers; the **playlist** vertical is layered (see §11.7).
+- **Next.js middleware warning** — The framework may warn that the `middleware` convention is deprecated in favor of `proxy`; non-blocking for this milestone.
 
 ---
 
