@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "My Music",
+  title: "PulsePlayer",
   description: "Music library — albums and tracks",
 };
 
