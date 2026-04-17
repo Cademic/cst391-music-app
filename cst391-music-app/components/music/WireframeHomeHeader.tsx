@@ -40,7 +40,7 @@ export default function WireframeHomeHeader() {
             PROFILE
           </Link>
           {isAdmin ? (
-            <Link className="wf-pill wf-pill--admin" href="/admin/playlists">
+            <Link className="wf-pill wf-pill--admin" href="/admin">
               ADMIN
             </Link>
           ) : null}

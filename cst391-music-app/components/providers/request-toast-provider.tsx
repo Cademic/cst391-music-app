@@ -16,6 +16,7 @@ type HttpRequestToast = {
 const TOAST_DISMISS_MS = 4500;
 const TOAST_EXIT_MS = 220;
 const TOAST_MAX = 2;
+const INITIAL_GET_SUPPRESS_MS = 2500;
 
 function getRequestInfo(
   input: RequestInfo | URL,
@@ -56,6 +57,7 @@ function shouldToastForPath(pathname: string): boolean {
 export default function RequestToastProvider() {
   const [toasts, setToasts] = useState<HttpRequestToast[]>([]);
   const timersRef = useRef<Map<string, number>>(new Map());
+  const mountedAtRef = useRef<number | null>(null);
 
   const patchKey = useMemo(() => "__wf_request_toast_patched__", []);
 
@@ -83,6 +85,9 @@ export default function RequestToastProvider() {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
+    mountedAtRef.current =
+      typeof performance !== "undefined" ? performance.now() : Date.now();
+
     const w = window as unknown as { [key: string]: unknown };
     if (w[patchKey] === true) return;
     w[patchKey] = true;
@@ -91,7 +96,14 @@ export default function RequestToastProvider() {
 
     window.fetch = (async (input: RequestInfo | URL, init?: RequestInit) => {
       const { method, url, pathname } = getRequestInfo(input, init);
-      const shouldToast = shouldToastForPath(pathname);
+      const elapsedSinceMount = mountedAtRef.current
+        ? (typeof performance !== "undefined" ? performance.now() : Date.now()) -
+          mountedAtRef.current
+        : Number.POSITIVE_INFINITY;
+      const shouldSuppressInitialGet =
+        method === "GET" && elapsedSinceMount < INITIAL_GET_SUPPRESS_MS;
+      const shouldToast =
+        shouldToastForPath(pathname) && !shouldSuppressInitialGet;
       const start =
         typeof performance !== "undefined" ? performance.now() : Date.now();
 

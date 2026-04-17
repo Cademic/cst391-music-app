@@ -76,3 +76,44 @@ export interface PlaylistDetailPayload {
   playlist: PlaylistSummary;
   tracks: PlaylistDetailTrack[];
 }
+
+export interface AdminUserSummary {
+  id: string;
+  email: string;
+  name: string | null;
+  image: string | null;
+  role: "user" | "admin";
+}
+
+export interface AdminAlbumSummary {
+  id: number;
+  title: string;
+  artist: string;
+  year: number;
+  image: string | null;
+  description: string | null;
+  releaseMbid: string | null;
+  trackCount: number;
+}
+
+export interface AdminTrackCreatePayload {
+  albumId: number;
+  number: number;
+  title: string;
+  lyrics?: string | null;
+  video?: string | null;
+}
+
+export interface AdminTrackSummary {
+  id: number;
+  albumId: number;
+  number: number;
+  title: string;
+  lyrics?: string | null;
+  video?: string | null;
+  recordingMbid?: string | null;
+}
+
+export interface AdminAlbumDetail extends AdminAlbumSummary {
+  tracks: AdminTrackSummary[];
+}

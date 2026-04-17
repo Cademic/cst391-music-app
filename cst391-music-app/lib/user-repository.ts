@@ -104,3 +104,15 @@ export async function getUserById(id: string): Promise<AppUserRow | null> {
   );
   return result.rows[0] ?? null;
 }
+
+export async function listUsersForAdmin(limit = 200): Promise<AppUserRow[]> {
+  const safeLimit = Number.isFinite(limit) ? Math.max(1, Math.min(500, Math.floor(limit))) : 200;
+  const result = await getPool().query<AppUserRow>(
+    `SELECT id, email, name, image, role
+     FROM users
+     ORDER BY LOWER(email) ASC
+     LIMIT $1`,
+    [safeLimit]
+  );
+  return result.rows;
+}

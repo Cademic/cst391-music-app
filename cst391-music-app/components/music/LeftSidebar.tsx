@@ -79,7 +79,7 @@ export default function LeftSidebar() {
         ))}
         {isAdmin ? (
           <Link
-            href="/admin/playlists"
+            href="/admin"
             className={`wf-left-item text-decoration-none ${
               pathname.startsWith("/admin") ? "wf-left-item--active" : ""
             }`}
