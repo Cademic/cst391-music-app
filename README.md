@@ -1,4 +1,6 @@
-![PulsePlayer](Docs/Images/Logo/PulsePlayerLogo.png)
+<div align="center">
+   <img src="Docs/Images/Logo/PulsePlayerLogo.png" alt="PulsePlayer">
+</div>
 
 ## Project Overview
 
