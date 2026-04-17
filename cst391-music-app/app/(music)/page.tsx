@@ -6,7 +6,6 @@ import {
   deletePlaylist,
   fetchPlaylistDetail,
   fetchMyPlaylists,
-  updatePlaylist,
 } from "@/lib/playlist-api";
 import CreatePlaylistModal from "@/components/music/CreatePlaylistModal";
 import DeletePlaylistModal from "@/components/music/DeletePlaylistModal";
@@ -210,23 +209,8 @@ export default function Page() {
     });
   }
 
-  async function handleRenamePlaylist(playlist: PlaylistSummary) {
-    const next = window.prompt("Playlist name", playlist.name);
-    if (next == null) {
-      return;
-    }
-    const trimmed = next.trim();
-    if (!trimmed || trimmed === playlist.name) {
-      return;
-    }
-    try {
-      const updated = await updatePlaylist(playlist.id, trimmed);
-      setPlaylists((prev) =>
-        prev.map((row) => (row.id === updated.id ? { ...row, name: updated.name } : row))
-      );
-    } catch (e) {
-      window.alert(e instanceof Error ? e.message : "Could not rename playlist.");
-    }
+  function handleEditPlaylist(playlist: PlaylistSummary) {
+    router.push(`/playlists/${playlist.id}?edit=1`);
   }
 
   async function handleDeletePlaylist() {
@@ -567,9 +551,9 @@ export default function Page() {
                           <button
                             type="button"
                             className="dropdown-item"
-                            onClick={() => void handleRenamePlaylist(p)}
+                            onClick={() => handleEditPlaylist(p)}
                           >
-                            Rename
+                            Edit
                           </button>
                         </li>
                         <li>
