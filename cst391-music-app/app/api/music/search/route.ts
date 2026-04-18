@@ -97,7 +97,8 @@ export async function GET(request: NextRequest) {
     const localLike = `%${q}%`;
     const qNormalized = normalizeLoose(q);
     const localLooseLike = `%${qNormalized}%`;
-    const localRes = await pool.query<LocalSearchRow>(
+
+    const localQueryPromise = pool.query<LocalSearchRow>(
       `SELECT
          a.id AS album_id,
          a.title AS album_title,
@@ -132,17 +133,6 @@ export async function GET(request: NextRequest) {
        LIMIT 120`,
       [localLike, localLooseLike]
     );
-
-    const localItems: MusicSearchItemDto[] = localRes.rows.map((row) => ({
-      mbid: row.release_mbid ?? `local-${row.album_id}`,
-      title: row.track_title ?? row.album_title,
-      artist: row.artist,
-      year: row.year ?? undefined,
-      disambiguation: row.track_title ? `Song • ${row.album_title}` : "Album",
-      coverArtUrl: row.image,
-      albumId: row.album_id,
-      trackId: row.track_id ?? undefined,
-    }));
 
     async function fetchAudioDbItems(term: string): Promise<MusicSearchItemDto[]> {
       const [
@@ -245,8 +235,23 @@ export async function GET(request: NextRequest) {
       return deduped;
     }
 
-    const primaryAudioItems = await fetchAudioDbItems(q);
-    let deduped = dedupeItems([...localItems, ...primaryAudioItems]);
+    const [localRes, primaryAudioItems] = await Promise.all([
+      localQueryPromise,
+      fetchAudioDbItems(q),
+    ]);
+
+    const localItems: MusicSearchItemDto[] = localRes.rows.map((row) => ({
+      mbid: row.release_mbid ?? `local-${row.album_id}`,
+      title: row.track_title ?? row.album_title,
+      artist: row.artist,
+      year: row.year ?? undefined,
+      disambiguation: row.track_title ? `Song • ${row.album_title}` : "Album",
+      coverArtUrl: row.image,
+      albumId: row.album_id,
+      trackId: row.track_id ?? undefined,
+    }));
+
+    let deduped = dedupeItems([...primaryAudioItems, ...localItems]);
 
     if (deduped.length === 0) {
       const compact = q.replace(/\s+/g, "");
@@ -258,10 +263,14 @@ export async function GET(request: NextRequest) {
         await Promise.all(fallbackTerms.map((term) => fetchAudioDbItems(term)))
       ).flat();
       const partialArtistItems = await fetchArtistPartialTrackItems(q);
-      deduped = dedupeItems([...localItems, ...fallbackAudioItems, ...partialArtistItems]);
+      deduped = dedupeItems([
+        ...fallbackAudioItems,
+        ...partialArtistItems,
+        ...localItems,
+      ]);
     } else if (deduped.length < limit) {
       const partialArtistItems = await fetchArtistPartialTrackItems(q);
-      deduped = dedupeItems([...deduped, ...partialArtistItems]);
+      deduped = dedupeItems([...partialArtistItems, ...deduped]);
     }
 
     const qNorm = normalizeLoose(q);
